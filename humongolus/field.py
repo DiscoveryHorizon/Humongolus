@@ -7,6 +7,15 @@ from gridfs import GridFS
 class MinException(FieldException): pass
 class MaxException(FieldException): pass
 
+def parse_date(val):
+    if isinstance(val, datetime.datetime):
+        return val
+    # Attempt to decode from float, assuming value is JavaScript UTC milliseconds
+    elif isinstance(val, float):
+        return datetime.datetime.utcfromtimestamp(val/1000)
+    return datetime.datetime(val)
+
+
 def parse_phone(number):
     try:
         phonePattern = re.compile(r'''
@@ -64,11 +73,9 @@ class Date(Field):
 
     def clean(self, val, doc=None):
         try:
-            if isinstance(val, datetime.datetime): return val
-            # Attempt to decode from float, assuming value is JavaScript UTC milliseconds
-            elif isinstance(val, float): return datetime.datetime.utcfromtimestamp(val/1000)
-            return datetime.datetime(val)
-        except: raise FieldException("%s: invalid datetime" % val)
+            return parse_date(val)
+        except:
+            raise FieldException("%s: invalid datetime" % val)
 
 
 class Boolean(Field):

@@ -750,8 +750,9 @@ class Document(base):
         self.__class__.__update__(q, update, **kwargs)
 
     def _map(self, vals, *args, **kwargs):
-        self.__created__ = vals.get('__created__', self.__created__)
-        self.__modified__ = vals.get('__modified__', self.__modified__)
+        from field import parse_date
+        self.__created__ = parse_date(vals.get('__created__', self.__created__))
+        self.__modified__ = parse_date(vals.get('__modified__', self.__modified__))
         self.__active__ = vals.get('__active__', self.__active__)
         try:
             self._id = ObjectId(vals.get('_id'))

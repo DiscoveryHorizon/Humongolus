@@ -1,5 +1,6 @@
 import datetime
 import re
+import logging
 from humongolus import Field, FieldException, Document, import_class
 from bson.objectid import ObjectId
 from gridfs import GridFS
@@ -8,12 +9,18 @@ class MinException(FieldException): pass
 class MaxException(FieldException): pass
 
 def parse_date(val):
-    if isinstance(val, datetime.datetime):
-        return val
-    # Attempt to decode from float, assuming value is JavaScript UTC milliseconds
-    elif isinstance(val, float):
-        return datetime.datetime.utcfromtimestamp(val/1000)
-    return datetime.datetime(val)
+    try:
+        if val is None:
+            return None
+        if isinstance(val, datetime.datetime):
+            return val
+        # Attempt to decode from float, assuming value is JavaScript UTC milliseconds
+        elif isinstance(val, float):
+            return datetime.datetime.utcfromtimestamp(val/1000)
+        return datetime.datetime(val)
+    except:
+        logging.exception('Could not parse date')
+    return None
 
 
 def parse_phone(number):
